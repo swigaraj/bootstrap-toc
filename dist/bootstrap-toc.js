@@ -1,5 +1,5 @@
 /*!
- * Bootstrap Table of Contents v1.0.1 (http://afeld.github.io/bootstrap-toc/)
+ * Bootstrap Table of Contents v<%= version %> (http://afeld.github.io/bootstrap-toc/)
  * Copyright 2015 Aidan Feldman
  * Licensed under MIT (https://github.com/afeld/bootstrap-toc/blob/gh-pages/LICENSE.md) */
 (function($) {
@@ -119,26 +119,36 @@
         return parseInt(el.tagName.charAt(1), 10);
       },
 
-      populateNav: function($topContext, topLevel, $headings) {
+       populateNav: function($topContext, topLevel, $headings) {
         var $context = $topContext;
-        var $prevNav;
+	var $prevNav;
+        var $middleContext;
+        var $thirdLevel;
 
         var helpers = this;
         $headings.each(function(i, el) {
           var $newNav = helpers.generateNavItem(el);
           var navLevel = helpers.getNavLevel(el);
-
-          // determine the proper $context
           if (navLevel === topLevel) {
-            // use top level
             $context = $topContext;
-          } else if ($prevNav && $context === $topContext) {
-            // create a new level of the tree and switch to it
-            $context = helpers.createChildNavList($prevNav);
-          } // else use the current $context
-
+          } else {
+            if (navLevel === topLevel+1) { 
+	      if ($context === $topContext) {
+	        $context = helpers.createChildNavList($prevNav);
+		$middleContext = $context;
+	      }
+	      if ($thirdLevel === true) {
+		$context = $middleContext;
+                $thirdLevel = false;
+              }
+	    } else { // if it is a third-level heading
+              if ($context === $middleContext) {
+                $context = helpers.createChildNavList($prevNav);
+	      }
+              $thirdLevel = true;
+            }
+          }
           $context.append($newNav);
-
           $prevNav = $newNav;
         });
       },
