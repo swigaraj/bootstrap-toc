@@ -1,5 +1,5 @@
 /*!
- * Bootstrap Table of Contents v<%= version %> (http://afeld.github.io/bootstrap-toc/)
+ * Bootstrap Table of Contents v1.0.1 (http://afeld.github.io/bootstrap-toc/)
  * Copyright 2015 Aidan Feldman
  * Licensed under MIT (https://github.com/afeld/bootstrap-toc/blob/gh-pages/LICENSE.md) */
 (function($) {
@@ -86,6 +86,11 @@
         return $li;
       },
 
+      generateEmptyNavEl: function() {
+        var $li = $('<li></li>');
+        return $li;
+      },
+
       generateNavItem: function(headingEl) {
         var anchor = this.generateAnchor(headingEl);
         var $heading = $(headingEl);
@@ -105,51 +110,55 @@
         return 1;
       },
 
-      // returns the elements for the top level, and the next below it
-      getHeadings: function($scope, topLevel) {
-        var topSelector = "h" + topLevel;
+      // Returns the headings by depth defined in the settings.
+      getHeadings: function($scope, depth, topLevel) {
+        var selector = '';
+        for (var i = topLevel; i < topLevel + depth; i++) {
+          selector += 'h' + i;
+          if (i < topLevel + depth - 1)
+            selector += ',';
+        }
 
-        var secondaryLevel = topLevel + 1;
-        var secondarySelector = "h" + secondaryLevel;
-
-        return this.findOrFilter($scope, topSelector + "," + secondarySelector);
+        return this.findOrFilter($scope, selector);
       },
 
       getNavLevel: function(el) {
         return parseInt(el.tagName.charAt(1), 10);
       },
 
-       populateNav: function($topContext, topLevel, $headings) {
-        var $context = $topContext;
-	var $prevNav;
-        var $middleContext;
-        var $thirdLevel;
+      populateNav: function($topContext, depth, topLevel, $headings) {
+        var $contexts = new Array(depth);
+				var helpers = this;
 
-        var helpers = this;
+        $contexts[0] = $topContext;
+        $topContext.lastNav = null;
+
         $headings.each(function(i, el) {
           var $newNav = helpers.generateNavItem(el);
           var navLevel = helpers.getNavLevel(el);
-          if (navLevel === topLevel) {
-            $context = $topContext;
-          } else {
-            if (navLevel === topLevel+1) { 
-	      if ($context === $topContext) {
-	        $context = helpers.createChildNavList($prevNav);
-		$middleContext = $context;
-	      }
-	      if ($thirdLevel === true) {
-		$context = $middleContext;
-                $thirdLevel = false;
+          var relLevel = navLevel - topLevel;
+          var j;
+
+          for (j = relLevel + 1; j < $contexts.length; j++) {
+            $contexts[j] = null;
+          }
+
+          if (!$contexts[relLevel]) {
+            for (j = 0; j < relLevel; j++) {
+              if (!$contexts[j + 1]) {
+                if (!$contexts[j].lastNav) {
+                  var $emptyNav = helpers.generateEmptyNavEl();
+                  $contexts[j].append($emptyNav);
+                  $contexts[j].lastNav = $emptyNav;
+                }
+                $contexts[j + 1] = helpers.createChildNavList($contexts[j].lastNav);
+                $contexts[j + 1].lastNav = null;
               }
-	    } else { // if it is a third-level heading
-              if ($context === $middleContext) {
-                $context = helpers.createChildNavList($prevNav);
-	      }
-              $thirdLevel = true;
             }
           }
-          $context.append($newNav);
-          $prevNav = $newNav;
+
+          $contexts[relLevel].append($newNav);
+          $contexts[relLevel].lastNav = $newNav;
         });
       },
 
@@ -163,6 +172,7 @@
           opts = arg;
         }
         opts.$scope = opts.$scope || $(document.body);
+        opts.depth = opts.depth || opts.$nav.attr('data-toc-depth') || 2;
         return opts;
       }
     },
@@ -176,8 +186,8 @@
 
       var $topContext = this.helpers.createChildNavList(opts.$nav);
       var topLevel = this.helpers.getTopLevel(opts.$scope);
-      var $headings = this.helpers.getHeadings(opts.$scope, topLevel);
-      this.helpers.populateNav($topContext, topLevel, $headings);
+      var $headings = this.helpers.getHeadings(opts.$scope, opts.depth, topLevel);
+      this.helpers.populateNav($topContext, opts.depth, topLevel, $headings);
     }
   };
 
