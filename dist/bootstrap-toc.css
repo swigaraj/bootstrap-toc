@@ -5,6 +5,7 @@
 
 /* All levels of nav */
 nav[data-toggle='toc'] .nav > li > a {
+  font-size: 18px;
   display: block;
   font-weight: 500;
   color: #767676;
@@ -29,7 +30,7 @@ nav[data-toggle="toc"] .nav-link.active:focus {
 }
 
 nav[data-toggle='toc'] {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 nav[data-toggle='toc'] .nav {
