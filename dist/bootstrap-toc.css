@@ -19,9 +19,9 @@ nav[data-toggle='toc'] .nav > li > a:focus {
   background-color: transparent;
   border-left: 1px solid #175612;
 }
-nav[data-toggle='toc'] .nav .active > a,
-nav[data-toggle='toc'] .nav .active:hover > a,
-nav[data-toggle='toc'] .nav .active:focus > a {
+nav[data-toggle='toc'] .nav > .active > a,
+nav[data-toggle='toc'] .nav > .active:hover > a,
+nav[data-toggle='toc'] .nav > .active:focus > a {
   font-weight: bold;
   color: #175612;
   background-color: transparent;
