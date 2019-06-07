@@ -191,6 +191,7 @@
     }
   };
 
+  // init
   $(function() {
     $('nav[data-toggle="toc"]').each(function(i, el) {
       var $nav = $(el);
